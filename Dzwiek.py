@@ -7,11 +7,11 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 88200
-# pokrywa cały zakres pasma częstotliwości słyszalnych przez człowieka oraz prawie cały zakres rozpiętości dynamicznej słyszalnych dźwięków.
-RECORD_SECONDS = 2
+RECORD_SECONDS = 3
 
 
 def writeToFile(file):
+    # Utworzenie portu audio
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT,
                     channels=CHANNELS,
@@ -33,6 +33,7 @@ def writeToFile(file):
     stream.close()
     p.terminate()
 
+    # Zapis dzwieku do pliku
     waveFile = wave.open(file, 'wb')
     waveFile.setnchannels(CHANNELS)
     waveFile.setsampwidth(p.get_sample_size(FORMAT))
@@ -43,7 +44,7 @@ def writeToFile(file):
 
 def readFromFile(plik):
     print("Odczytywanie dzwięku. ")
-
+    # Odczytywanie dzwieku z pliku
     waveFile = wave.open(plik, 'rb')
     p = pyaudio.PyAudio()
     stream = p.open(format=p.get_format_from_width(waveFile.getsampwidth()),
@@ -59,6 +60,7 @@ def readFromFile(plik):
 
 
 def quantization(nazwa):
+    # Kwantyzacja dzwieku w roznych poziomach
     data, samplerate = sf.read(nazwa)
     plik = "16" + nazwa
     sf.write(plik, data, samplerate, subtype="PCM_16")
@@ -68,14 +70,14 @@ def quantization(nazwa):
     readFromFile(plik)
 
 
-
-
+def nagrajIOdtworz():
     stringRate = '88200'
     fileName = "Dzwiek.wav"
     print("Czestotliwosc " + stringRate)
     writeToFile(stringRate + fileName)
     readFromFile(stringRate + fileName)
     quantization(stringRate + fileName)
+    # pokrywa cały zakres pasma częstotliwości słyszalnych przez człowieka oraz prawie cały zakres rozpiętości dynamicznej słyszalnych dźwięków.
     RATE = 44100
     stringRate = '44100'
     print("Czestotliwosc " + stringRate)
@@ -88,3 +90,21 @@ def quantization(nazwa):
     writeToFile(stringRate + fileName)
     readFromFile(stringRate + fileName)
     quantization(stringRate + fileName)
+
+
+def odtworz():
+    fileName = "Bet.wav"
+    readFromFile(fileName)
+    quantization(fileName)
+
+
+def main():
+    wybor = input("1. Nagrywanie i odtwarzanie\n2. Odtwarzanie\n")
+    if wybor == "1":
+        nagrajIOdtworz()
+    elif wybor =="2":
+        odtworz()
+
+
+if __name__ == '__main__':
+    main()
