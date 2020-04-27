@@ -5,19 +5,19 @@ import soundfile as sf
 
 # 1024 domyslna wartosc - liczba ramek na bufor
 CHUNK = 1024
-FORMAT = pyaudio.paInt24
+FORMAT = pyaudio.paInt16
 CHANNELS = 2
-# czestotliwosc probkowania
-RATE = 88200
+# czestotliwosc probkowania - liczba probek na sekunde
+RATE = 96000
 RECORD_SECONDS = 3
 
 
 def writeToFile(file):
     # Utworzenie portu audio
-    p = pyaudio.PyAudio()
+    pya = pyaudio.PyAudio()
 
-    # Otwarcie strumienia audio: format 24 bitowy (najwyzszy mozliwy), 2 kanaly, czestotliwosc probkowania, okreslenie jako strumienia wejsciowego, liczba ramek na bufor
-    stream = p.open(format=FORMAT,
+    # Otwarcie strumienia audio: format 16 bitowy (najwyzszy mozliwy), 2 kanaly, czestotliwosc probkowania, okreslenie jako strumienia wejsciowego, liczba ramek na bufor
+    streamAudio = pya.open(format=FORMAT,
                     channels=CHANNELS,
                     rate=RATE,
                     input=True,
@@ -27,27 +27,28 @@ def writeToFile(file):
 
     frames = []
 
-    # Odczytanie ramek, ktorych ilosc jest rowna czestotliowsci probkowania / liczba ramek na bufor * liczba nagranych sek
+    # Odczytanie ramek
+    # liczba probek na sekunde / liczba ramek na bufor * liczba nagranych sek - calkowita liczba ramek na sekunde podzielona przez liczbe ramek na bufor = liczba kawalkow na sekunde
     for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
         # CHUNK - liczba ramek do odczytania
-        data = stream.read(CHUNK)
+        data = streamAudio.read(CHUNK)
         # Wstawienie odczytanych ramek do zmiennej przechowywujacej wszysktie ramki
         frames.append(data)
 
     print("Nagrywanie zakonczone. ")
 
     # Zamkniecie strumienia
-    stream.stop_stream()
-    stream.close()
+    streamAudio.stop_stream()
+    streamAudio.close()
     # Zamkniecie portu audio
-    p.terminate()
+    pya.terminate()
 
     # Otwarcie pliku wav
     waveFile = wave.open(file, 'wb')
     # Ustawienie liczby kanalow
     waveFile.setnchannels(CHANNELS)
     # Ustawienie wielkosci probki
-    waveFile.setsampwidth(p.get_sample_size(FORMAT))
+    waveFile.setsampwidth(pya.get_sample_size(FORMAT))
     # Ustawienie czestotliwosci probkowania
     waveFile.setframerate(RATE)
     # Zapisuje ramki do pliku
@@ -61,10 +62,10 @@ def readFromFile(plik):
 
     # Utworzenie portu audio i otwarcie pliku do odczytu
     waveFile = wave.open(plik, 'rb')
-    p = pyaudio.PyAudio()
+    pya = pyaudio.PyAudio()
 
     # Otwarcie strumienia audio ustawiajac parametry pobrane z parametrow pliku wav, ustawienie na strumien wyjsciowy
-    stream = p.open(format=p.get_format_from_width(waveFile.getsampwidth()),
+    streamAudio = pya.open(format=pya.get_format_from_width(waveFile.getsampwidth()),
                     channels=waveFile.getnchannels(),
                     rate=waveFile.getframerate(),
                     output=True)
@@ -73,18 +74,20 @@ def readFromFile(plik):
     framesFromFile = waveFile.readframes(CHUNK)
     while len(framesFromFile) > 0:
         # Odtwarzanie ramek dla sekundy
-        stream.write(framesFromFile)
+        streamAudio.write(framesFromFile)
         # dla kolejnych sekund
         framesFromFile = waveFile.readframes(CHUNK)
 
     # Zamkniecie strumienia
-    stream.close()
+    streamAudio.close()
     # Zakonczenie portu audio
-    p.terminate()
+    pya.terminate()
 
 # Kwantyzacja dzwieku
 def quantization(nazwa):
     # Odczytanie ramek z pliku, metoda .read zwraca ramki, czestotliwosc probkowania
+    print("Wartosc SNR dla 16bitow wynosi: ", 6.02 * 16, "dB")
+    print("Wartosc SNR dla 8bitow wynosi: ", 6.02 * 8, "dB")
     data, samplerate = sf.read(nazwa)
     plik = "16" + nazwa
 
@@ -104,17 +107,20 @@ def quantization(nazwa):
 
 def nagrajIOdtworz():
     # Nagrywanie dziweku z roznymi czestotliwosciami probkownia
-    stringRate = '88200'
     fileName = "Dzwiek.wav"
+
+    stringRate = '96000'
     print("Czestotliwosc " + stringRate)
     writeToFile(stringRate + fileName)
     odtworz(stringRate + fileName)
-    # pokrywa cały zakres pasma częstotliwości słyszalnych przez człowieka oraz prawie cały zakres rozpiętości dynamicznej słyszalnych dźwięków.
+
+    # pokrywa cały zakres pasma częstotliwości słyszalnych przez człowieka
     RATE = 44100
     stringRate = '44100'
     print("Czestotliwosc " + stringRate)
     writeToFile(stringRate + fileName)
     odtworz(stringRate + fileName)
+
     RATE = 22050
     stringRate = '22050'
     print("Czestotliwosc " + stringRate)
