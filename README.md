@@ -25,3 +25,6 @@ pip install Pyaudio wave soundfile
 For [Beethoven.wav]() file programme will generate to wav files:
 * [Rate_8_Beethoven.wav](https://raw.githubusercontent.com/JuliaSzymanska/Sound/master/Rate_8_Beethoven.wav) with 8  bit depth
 * [Rate_16_Beethoven.wav](https://raw.githubusercontent.com/JuliaSzymanska/Sound/master/Rate_16_Beethoven.wav) with 16  bit depth
+
+## License
+[Apache License 2.0](https://github.com/JuliaSzymanska/Sound)
