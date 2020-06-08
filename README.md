@@ -1,4 +1,4 @@
-## A/C and A/C processing
+## A/C and C/A processing
 Simplifying the analog signal to a quantized form, i.e. replacing values that change smoothly to values that change by leaps and bounds.
 
 A/C processing consists of 3 stages:
